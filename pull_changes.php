@@ -63,6 +63,10 @@ if(isset($_GET['test'])){
 			echo 'conf for ' . $repurl . ' has different key url - ' . $repconf['url'];
 			exit;
 		}
+		if($repurl[strlen($repurl) - 1] == '/'){
+			echo '!!! ' . $repurl . ' has / at end. Please remove or report bug. !!!';
+			exit;
+		}
 		foreach($repconf['branches'] as $branch_name => $branch){
 			foreach($branch['folders'] as $folder){
 				if(!file_exists($folder['path'])){
