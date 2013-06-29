@@ -3,8 +3,6 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-$source = 'cmd';
-
 $output = null;
 $ret = null;
 $int_return = null;
