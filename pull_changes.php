@@ -9,7 +9,6 @@ $output = null;
 $ret = null;
 $int_return = null;
 
-
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 	$os = 'win';
 } else {
