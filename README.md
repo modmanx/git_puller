@@ -22,9 +22,11 @@ NOTES (win):
 NOTES (nix):
 * chmod 0777 git-puller-nix.sh first time
 * git config --global core.filemode false
-* add following post-receive hook
+* add following post-merge hook
   #!/bin/sh
-  cd ..
+  echo "setting persmissions"
+  echo "curr dir"
+  echo $(pwd)
   env -i chmod 0777 git-puller-nix.sh
 
 TODO:
