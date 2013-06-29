@@ -6,7 +6,7 @@ $output = null;
 $ret = null;
 $int_return = null;
 
-$server_name = strtolower('win01');
+$server_name = strtolower($_SERVER['SERVER_NAME']);
 
 $conf = include('config.php');
 
