@@ -19,6 +19,9 @@ NOTES (win):
 * and make sure that c:/Users/Administrator//.gitconfig have permission for IUSR
 * make deploykey and put it to github
 
+NOTES (nix):
+* chmod 0777 git-puller-nix.sh
+
 TODO:
 -----
 

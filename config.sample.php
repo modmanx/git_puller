@@ -10,7 +10,7 @@ return array(
 						'name' => 'develop',
 						'folders' => array(
 							array(
-								'c:\\inetpub\\wwwroot\\git_puller\\public\\'
+								'path' => 'c:\\inetpub\\wwwroot\\git_puller\\public\\'
 							)
 						)
 					)
