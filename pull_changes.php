@@ -108,7 +108,7 @@ if(isset($_GET['test'])){
 		}
 		echo '<hr />';		
 	}
-	exit;
+	exit;	
 }
 
 $conf = include('config.php');
@@ -122,7 +122,6 @@ file_put_contents($logfile,
 	print_r($_POST, true), FILE_APPEND);
 
 $reps = isset($conf[$server_name]['reps']) ? $conf[$server_name]['reps'] : array();
-
 
 if(isset($_POST['payload'])){
 
