@@ -1,0 +1,1 @@
+sudo chmod 0777 git-puller-nix.sh

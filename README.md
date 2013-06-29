@@ -20,7 +20,8 @@ NOTES (win):
 * make deploykey and put it to github
 
 NOTES (nix):
-* chmod 0777 git-puller-nix.sh
+* chmod 0777 git-puller-nix.sh first time
+* git config --global core.filemode false
 
 TODO:
 -----
