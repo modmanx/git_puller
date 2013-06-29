@@ -22,6 +22,10 @@ NOTES (win):
 NOTES (nix):
 * chmod 0777 git-puller-nix.sh first time
 * git config --global core.filemode false
+* add following post-receive hook
+  #!/bin/sh
+  cd ..
+  env -i chmod 0777 git-puller-nix.sh
 
 TODO:
 -----
