@@ -78,7 +78,7 @@ function _send_email_mailgun($params = array()){
 		)
 	);
 
-	curl_setopt($ch, CURLOPT_URL, $mailgun['api_url']);
+	curl_setopt($ch, CURLOPT_URL, $params['api_url']);
 	curl_setopt($ch, CURLOPT_POST, 1);
 	curl_setopt($ch, CURLOPT_USERPWD, 'api:' . $params['api_key']);
 	curl_setopt($ch, CURLOPT_POSTFIELDS,
