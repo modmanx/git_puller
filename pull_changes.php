@@ -263,35 +263,35 @@ if(isset($_POST['payload'])){
 }else if(isset($_GET['do_pull'])){
 
 	if(!isset($_GET['ref'])){
-		log_write('log.txt', 'GET ref not set');
+		log_write('GET ref not set', array(), array('email' => true));
 		exit;
 	}
 	
 	if(!isset($_GET['url'])){
-		log_write('log.txt', 'GET url not set');
+		log_write('GET url not set', array(), array('email' => true));
 		exit;
 	}
 
 	$ref = explode('/', $_GET['ref']);	
 	$branch = $ref[count($ref) - 1];
-	log_write('branch: ' . $branch);
+	log_write('branch: ' . $branch, array(), array('email' => true));
 	
 	if(isset($reps[$_GET['url']])){
 		$repo = $reps[$_GET['url']];
 	}else{
-		log_write('repo does not exists: ' . $_GET['url']);
+		log_write('repo does not exists: ' . $_GET['url'], array(), array('email' => true));
 		exit;
 	}
 	
 	if(isset($repo['branches'][$branch])){
 		$branch_data = $repo['branches'][$branch];
 	}else{
-		log_write('branch does not exists: ' . $branch);
+		log_write('branch does not exists: ' . $branch, array(), array('email' => true));
 		exit;
 	}
 	
 	foreach($branch_data['folders'] as $folder){
-		log_write('calling git-puller.sh');
+		log_write('calling git-puller.sh', array(), array('email' => true));
 		if($os == 'win'){
 			exec('"%GIT_BIN_PATH%/sh.exe" ./git-puller-' . $os . '.sh ' .
 				'"' . $folder['path'] . '" ' . $branch . ' 2>&1',
@@ -301,7 +301,7 @@ if(isset($_POST['payload'])){
 				'"' . $folder['path'] . '" ' . $branch . ' 2>&1',
 				$output, $int_return);	
 		}
-		log_write('output', $output);
+		log_write('output', $output, array('email' => true));
 		echo 'output<pre>' . print_r($output, true) . '</pre>';
 	}
 
