@@ -102,7 +102,6 @@ function log_write($txt, $params = array(), $extra = array()){
 				'subject' => 'GitPuller - ' . $txt . ' ' . $server_name,
 				'text' => date('Y-m-d H:i:s') . ' -- ' . $req_id . PHP_EOL . PHP_EOL .
 							print_r($params, true) . PHP_EOL . PHP_EOL .
-							print_r($params, true) . PHP_EOL . PHP_EOL .
 							' ------------ ' . PHP_EOL . PHP_EOL	.
 							print_r($_POST, true) . PHP_EOL . PHP_EOL .
 							print_r($_GET, true)
