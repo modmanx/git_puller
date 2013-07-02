@@ -274,7 +274,7 @@ if(isset($_POST['payload'])){
 
 	$ref = explode('/', $_GET['ref']);	
 	$branch = $ref[count($ref) - 1];
-	log_write('branch: ' . $branch, array(), array('email' => true));
+	log_write('branch: ' . $branch);
 	
 	if(isset($reps[$_GET['url']])){
 		$repo = $reps[$_GET['url']];
@@ -291,7 +291,7 @@ if(isset($_POST['payload'])){
 	}
 	
 	foreach($branch_data['folders'] as $folder){
-		log_write('calling git-puller.sh', array(), array('email' => true));
+		log_write('calling git-puller.sh');
 		if($os == 'win'){
 			exec('"%GIT_BIN_PATH%/sh.exe" ./git-puller-' . $os . '.sh ' .
 				'"' . $folder['path'] . '" ' . $branch . ' 2>&1',
