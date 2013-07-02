@@ -1,5 +1,7 @@
 <?php
 
+$req_id = sha1(microtime(true) . $_SERVER['REMOTE_ADDR']);
+
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
@@ -15,15 +17,108 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 
 $server_name = strtolower($_SERVER['SERVER_NAME']);
 
+if(file_exists('config.php')){
+	$config = include('config.php');
+}else{
+	echo '!!! config.php does not exists !!!';
+	exit;
+}
+
+$server_config = array();
+
+if(isset($config[$server_name])){
+	$server_config = $config[$server_name];
+}else{	
+	echo '!!! config.php does not have server config (' . $server_name . ') !!!';
+	exit;
+}
+
 if(!file_exists('gitlog')){
 	mkdir('gitlog');
 }
 
 $logfile = 'gitlog/git-puller-log.txt';
 
+function send_email($params = array()){
+	global $server_config;
+	if(isset($server_config['mailgun'])){
+		$params = array_merge(array(
+			'api_url' => '',
+			'api_key' => '',
+			'subject' => '',
+			'text' => '',
+			'from' => '',
+			'to' => ''
+		), $server_config['mailgun'], $params);
+		_send_email_mailgun($params);
+	}else{
+
+	}
+}
+
+function _send_email_mailgun($params = array()){
+
+	$ch = curl_init();
+
+	$params = array_merge(array(
+			'api_url' => '',
+			'api_key' => '',
+			'subject' => '',
+			'text' => '',
+			'from' => '',
+			'to' => ''
+		), $params);
+
+	$data = array_intersect_key(
+		$params, array(
+			'from' => '',
+			'to' => '',
+			'subject' => '',
+			'text' => ''
+		)
+	);
+
+	curl_setopt($ch, CURLOPT_URL, $mailgun['api_url']);
+	curl_setopt($ch, CURLOPT_POST, 1);
+	curl_setopt($ch, CURLOPT_USERPWD, 'api:' . $params['api_key']);
+	curl_setopt($ch, CURLOPT_POSTFIELDS,
+	            http_build_query($data));
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+	$server_output = curl_exec($ch);
+
+	curl_close($ch);
+
+	return $server_output;
+
+}
+
+function log_write($txt, $params = array(), $extra = array()){
+
+	global $req_id, $logfile, $server_name;
+	if(isset($extra['email'])){
+		send_email(array(
+				'subject' => 'GitPuller - ' . $txt . ' ' . $server_name,
+				'text' => date('Y-m-d H:i:s') . ' -- ' . $req_id . PHP_EOL . PHP_EOL .
+							print_r($params, true) . PHP_EOL . PHP_EOL .
+							print_r($params, true) . PHP_EOL . PHP_EOL .
+							' ------------ ' . PHP_EOL . PHP_EOL	.
+							print_r($_POST, true) . PHP_EOL . PHP_EOL .
+							print_r($_GET, true)
+			));
+	}
+	file_put_contents($logfile, '[' . date('Y-m-d H:i:s') . '] ' .
+		$txt . ' --- ' . json_encode($params) . ' --- ' . $req_id, FILE_APPEND);
+
+}
+
 if(isset($_GET['test'])){
 	echo 'server name = ' . $server_name . '<br />';
 	echo 'OS = ' . $os . '<br />';
+	echo '<hr />';
+	echo 'testing email:<br />';
+	// make email test
 	echo '<hr />';
 	echo 'testing if log folder is writable:<br />';
 	if(!is_writable('gitlog')){
@@ -115,71 +210,100 @@ if(isset($_GET['test'])){
 
 $conf = include('config.php');
 
-file_put_contents($logfile,
-	'=========== ' . date('j.n.Y H:i:s') . ' ===========' . PHP_EOL .
-	print_r($output, true) .
-	'=== GET ===' .
-	print_r($_GET, true) . 
-	'=== POST ===' .
-	print_r($_POST, true), FILE_APPEND);
+log_write('request', array('post' => $_POST));
 
-$reps = isset($conf[$server_name]['reps']) ? $conf[$server_name]['reps'] : array();
+$reps = isset($server_config['reps']) ? $server_config['reps'] : array();
 
 if(isset($_POST['payload'])){
 
 	try{
 		$json = json_decode($_POST['payload'], true);
 	}catch(Exception $e){
-		file_put_contents($logfile, 'payload broken' . PHP_EOL, FILE_APPEND);
+		log_write('payload broken', array(), array('email' => true));
 		exit;
 	}
-	file_put_contents($logfile, 'payload: ' . print_r($json, true) . PHP_EOL, FILE_APPEND);
+	log_write('payload', $json);
 	if(!isset($json['repository'])){
-		file_put_contents('git-puller-log.txt', 'payload repository broken' . PHP_EOL, FILE_APPEND);
+		log_write('payload repository broken', array(), array('email' => true));
 		exit;
 	}
 	
 	$ref = explode('/', $json['ref']);	
 	$branch = $ref[count($ref) - 1];
-	file_put_contents($logfile, '-> branch: ' . $branch . PHP_EOL, FILE_APPEND);
+	log_write('branch: ' . $branch);
 	
 	if(isset($reps[$json['repository']['url']])){
 		$repo = $reps[$json['repository']['url']];
 	}else{
-		file_put_contents($logfile, '-> repo does not exists: ' . $json['repository']['url'] . PHP_EOL, FILE_APPEND);
+		log_write('repo does not exists: ' . $json['repository']['url'], array('reps' => $reps), array('email' => true));
 		exit;
 	}
 	
 	if(isset($repo['branches'][$branch])){
 		$branch_data = $repo['branches'][$branch];
 	}else{
-		file_put_contents($logfile, '-> branch does not exists: ' . $branch . PHP_EOL, FILE_APPEND);
+		log_write('branch does not exists: ' . $branch, array('repo' => $repo), array('email' => true));
 		exit;
 	}
 	
 	foreach($branch_data['folders'] as $folder){
-		file_put_contents($logfile, '-> calling git-puller.sh' . PHP_EOL, FILE_APPEND);
+		log_write('calling git-puller.sh');
 		if($os == 'win'){
 			exec('"%GIT_BIN_PATH%/sh.exe" ./git-puller-' . $os . '.sh ' .
-				'"' . $folder['path'] . '" ' . $branch_name . ' 2>&1',
+				'"' . $folder['path'] . '" ' . $branch . ' 2>&1',
 				$output, $int_return);			
 		}else{
 			exec('./git-puller-' . $os . '.sh ' .
-				'"' . $folder['path'] . '" ' . $branch_name . ' 2>&1',
+				'"' . $folder['path'] . '" ' . $branch . ' 2>&1',
 				$output, $int_return);	
 		}
-		file_put_contents($logfile, '-> output: ' . PHP_EOL . print_r($output, true) . PHP_EOL, FILE_APPEND);
+		log_write('output', $output, array('email' => true));
 	}
 	
-}else if(!isset($_GET['do_pull'])){
-	echo 'do_pull NOT SET';
-	file_put_contents($logfile,
-                '=========== ' . date('j.n.Y H:i:s') . ' =========== do_pull NOT SET' . PHP_EOL .
-                print_r($output, true) .
-                '=== GET ===' .
-                print_r($_GET, true) .
-                '=== POST ===' .
-                print_r($_POST, true), FILE_APPEND);
-        exit;
+}else if(isset($_GET['do_pull'])){
+
+	if(!isset($_GET['ref'])){
+		log_write('log.txt', 'GET ref not set');
+		exit;
+	}
+	
+	if(!isset($_GET['url'])){
+		log_write('log.txt', 'GET url not set');
+		exit;
+	}
+
+	$ref = explode('/', $_GET['ref']);	
+	$branch = $ref[count($ref) - 1];
+	log_write('branch: ' . $branch);
+	
+	if(isset($reps[$_GET['url']])){
+		$repo = $reps[$_GET['url']];
+	}else{
+		log_write('repo does not exists: ' . $_GET['url']);
+		exit;
+	}
+	
+	if(isset($repo['branches'][$branch])){
+		$branch_data = $repo['branches'][$branch];
+	}else{
+		log_write('branch does not exists: ' . $branch);
+		exit;
+	}
+	
+	foreach($branch_data['folders'] as $folder){
+		log_write('calling git-puller.sh');
+		if($os == 'win'){
+			exec('"%GIT_BIN_PATH%/sh.exe" ./git-puller-' . $os . '.sh ' .
+				'"' . $folder['path'] . '" ' . $branch . ' 2>&1',
+				$output, $int_return);			
+		}else{
+			exec('./git-puller-' . $os . '.sh ' .
+				'"' . $folder['path'] . '" ' . $branch . ' 2>&1',
+				$output, $int_return);	
+		}
+		log_write('output', $output);
+		echo 'output<pre>' . print_r($output, true) . '</pre>';
+	}
+
 }
 
