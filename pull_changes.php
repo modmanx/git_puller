@@ -50,7 +50,7 @@ function send_email($params = array()){
 			'from' => '',
 			'to' => ''
 		), $server_config['mailgun'], $params);
-		_send_email_mailgun($params);
+		return _send_email_mailgun($params);
 	}else{
 
 	}
@@ -97,8 +97,9 @@ function _send_email_mailgun($params = array()){
 function log_write($txt, $params = array(), $extra = array()){
 
 	global $req_id, $logfile, $server_name;
+	$ret = '';
 	if(isset($extra['email'])){
-		send_email(array(
+		$ret .= send_email(array(
 				'subject' => 'GitPuller - ' . $txt . ' ' . $server_name,
 				'text' => date('Y-m-d H:i:s') . ' -- ' . $req_id . PHP_EOL . PHP_EOL .
 							print_r($params, true) . PHP_EOL . PHP_EOL .
@@ -109,6 +110,8 @@ function log_write($txt, $params = array(), $extra = array()){
 	}
 	file_put_contents($logfile, '[' . date('Y-m-d H:i:s') . '] ' .
 		$txt . ' --- ' . json_encode($params) . ' --- ' . $req_id, FILE_APPEND);
+	
+	return $ret;
 
 }
 
@@ -118,6 +121,7 @@ if(isset($_GET['test'])){
 	echo '<hr />';
 	echo 'testing email:<br />';
 	// make email test
+	echo log_write('payload broken', array(), array('email' => true));
 	echo '<hr />';
 	echo 'testing if log folder is writable:<br />';
 	if(!is_writable('gitlog')){
