@@ -1,27 +1,28 @@
 <?php
 
 return array(
-	'win01' => array(
-		'mailgun' => array(
-			'api_url' => 'https://api.mailgun.net/v2/xyzxyzxyz/messages',
-			'api_key' => 'key-i_cant_tell_you',
-			'from' => 'god',
-			'to' => 'you',			
-		),
-		'reps' => array(
-			'https://github.com/modmanx/git_puller' => array(
-				'url' => 'https://github.com/modmanx/git_puller',
-				'branches' => array(
-					'develop' => array(
-						'name' => 'develop',
-						'folders' => array(
-							array(
-								'path' => 'c:\\inetpub\\wwwroot\\git_puller\\public\\'
-							)
-						)
-					)
-				)
-			),
-		)
-	)
+        'hostname.host.com' => array(
+                'mailgun' => array(
+                        'api_url' => 'https://api.mailgun.net/v2/DOMAIN_NAME/messages',
+                        'api_key' => 'key-some_key',
+                        'from' => 'some@email.com',
+                        'to' => 'some@email.com',
+                ),
+                'reps' => array(
+                        'https://github.com/account/repo' => array(
+                                'url' => 'https://github.com/account/repo',
+                                'ssh_url' => 'git@github.com:account/repo.git',
+                                'branches' => array(
+                                        'develop' => array( // branch name
+                                                'name' => 'develop', // branch name
+                                                'folders' => array(
+                                                        array(
+                                                                'path' => '/var/www/vhosts/00-default/public/test_deploy'
+                                                        )
+                                                )
+                                        )
+                                )
+                        ),
+                )
+        )
 );
