@@ -246,7 +246,7 @@ if(isset($_POST['payload'])){
     }
 
     if(isset($repo['branches'][$branch])){
-        $branch_data = $repo['branches'][$branch];d
+        $branch_data = $repo['branches'][$branch];
     }else{
         log_write('branch does not exists: ' . $branch, array('repo' => $repo), array('email' => true));
         exit;
