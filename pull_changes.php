@@ -40,7 +40,6 @@ if(!file_exists('gitlog')){
 $logfile = 'gitlog/git-puller-log.txt';
 
 function send_email($params = array()){
-    return '';
     global $server_config;
     if(isset($server_config['mailgun'])){
         $params = array_merge(array(
@@ -247,7 +246,7 @@ if(isset($_POST['payload'])){
     }
 
     if(isset($repo['branches'][$branch])){
-        $branch_data = $repo['branches'][$branch];
+        $branch_data = $repo['branches'][$branch];d
     }else{
         log_write('branch does not exists: ' . $branch, array('repo' => $repo), array('email' => true));
         exit;
