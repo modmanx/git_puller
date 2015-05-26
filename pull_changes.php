@@ -1,5 +1,7 @@
 <?php
 
+$curr_path = dirname(__FILE__) . '/';
+
 $req_id = sha1(microtime(true) . $_SERVER['REMOTE_ADDR']);
 
 error_reporting(E_ALL);
@@ -24,24 +26,15 @@ if(file_exists('config.php')){
     exit;
 }
 
-$server_config = array();
-
-if(isset($config[$server_name])){
-    $server_config = $config[$server_name];
-}else{
-    echo '!!! config.php does not have server config (' . $server_name . ') !!!';
-    exit;
+if(!file_exists($curr_path . 'gitlog')){
+    mkdir($curr_path . 'gitlog');
 }
 
-if(!file_exists('gitlog')){
-    mkdir('gitlog');
-}
-
-$logfile = 'gitlog/git-puller-log.txt';
+$logfile = $curr_path . 'gitlog/git-puller-log.txt';
 
 function send_email($params = array()){
-    global $server_config;
-    if(isset($server_config['mailgun'])){
+    global $config;
+    if(isset($config['mailgun'])){
         $params = array_merge(array(
             'api_url' => '',
             'api_key' => '',
@@ -49,7 +42,7 @@ function send_email($params = array()){
             'text' => '',
             'from' => '',
             'to' => ''
-        ), $server_config['mailgun'], $params);
+        ), $config['mailgun'], $params);
         return _send_email_mailgun($params);
     }else{
 
@@ -127,7 +120,7 @@ if(isset($_GET['test'])){
     echo log_write('payload broken', array(), array('email' => true));
     echo '<hr />';
     echo 'testing if log folder is writable:<br />';
-    if(!is_writable('gitlog')){
+    if(!is_writable($logfile)){
         echo '!!! gitlog folder is not writable !!!';
     }else{
         echo 'folder is writable';
@@ -140,26 +133,14 @@ if(isset($_GET['test'])){
         echo 'config.php exists';
     }
     echo '<hr />';
+
     $conf = include('config.php');
-    echo 'testing if config.php include config for this server:<br />';
-    if(!isset($conf[$server_name])){
-        echo '!!! config.php DOES NOT include config for this server !!!';
-    }else{
-        echo 'config.php does include config for this server';
-    }
-    echo '<hr />';
-    echo 'testing if config.php has OK structure:<br />';
-    $struct_err = false;
-    if(!isset($conf[$server_name])){
-        echo 'conf for ' . $server_name . ' DOES NOT exists ';
-        exit;
-    }
-    $sconf = $conf[$server_name];
-    if(!isset($sconf['reps'])){
+
+    if(!isset($conf['reps'])){
         echo 'conf doesnt have \'reps\' key';
         exit;
     }
-    foreach($sconf['reps'] as $repurl => $repconf){
+    foreach($conf['reps'] as $repurl => $repconf){
         if($repurl !== $repconf['url']){
             echo 'conf for ' . $repurl . ' has different key url - ' . $repconf['url'];
             exit;
@@ -181,9 +162,6 @@ if(isset($_GET['test'])){
             }
         }
     }
-    if(!$struct_err){
-        echo 'config.php is OK';
-    }
     echo '<hr />';
     echo 'testing if for env vars:<br />';
     if($os == 'win'){
@@ -194,7 +172,6 @@ if(isset($_GET['test'])){
             echo '%GIT_BIN_PATH% is OK<br />';
         }
     }
-    echo '<hr />';
     if($os == 'nix'){
         echo 'testing if git-puller-' . $os . '.sh is executable:<br />';
         if(!file_exists('./git-puller-' . $os . '.sh')){
@@ -218,7 +195,7 @@ $conf = include('config.php');
 
 log_write('request', array('post' => $_POST));
 
-$reps = isset($server_config['reps']) ? $server_config['reps'] : array();
+$reps = isset($conf['reps']) ? $conf['reps'] : array();
 
 if(isset($_POST['payload'])){
 
